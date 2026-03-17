@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cat4.org | terminal</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --fg: #000000;
+            --accent: #555555;
+            --font: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: var(--font);
+            margin: 0;
+            padding: 40px;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .prompt::before {
+            content: "> ";
+            color: var(--accent);
+        }
+
+        header { margin-bottom: 40px; }
+        section { margin-bottom: 30px; }
+        
+        h1, h2 { 
+            font-size: 1rem; 
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid var(--fg);
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { margin-bottom: 5px; }
+        li::before { content: "- "; color: var(--accent); }
+
+        a { color: var(--fg); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+        a:hover { background: var(--fg); color: var(--bg); }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: var(--fg);
+            margin-left: 5px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="prompt">whoami</div>
+            <p><strong>developer</strong> @ cat4.org</p>
+        </header>
+
+        <section id="about">
+            <h2>About Me</h2>
+            <p>minimalist finalboss. currently fucking around with hyprland too much.</p>
+        </section>
+
+        <section id="projects">
+            <h2>Projects</h2>
+            <ul>
+                <li><a href="#">cotfiles</a> - cute ass dotfiles trust</li>
+                <li><a href="#">cat4-core</a> - lightweight backend utility</li>
+            </ul>
+        </section>
+
+        <section id="skills">
+            <h2>skills</h2>
+            <p>bash, python, learning rust, linux system administration</p>
+        </section>
+
+        <footer>
+            <div class="prompt">logout<span class="cursor"></span></div>
+        </footer>
+    </div>
+</body>
+</html>
