@@ -1,36 +1,35 @@
 import feedparser
 import json
 import requests
-import re
-from html import unescape
+from bs4 import BeautifulSoup
 
 def translate(text):
-    if not text: return ""
+    if not text or len(text) < 3: return text
     try:
-        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=en&dt=t&q={requests.utils.quote(text)}"
-        res = requests.get(url).json()
-        return "".join([sentence[0] for sentence in res[0]])
+        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={requests.utils.quote(text)}"
+        res = requests.get(url, timeout=5).json()
+        return "".join([s[0] for s in res[0]])
     except:
         return text
 
 def scrape():
-    feed = feedparser.parse("https://www.anime2you.de/feed/")
+    feed = feedparser.parse("https://www.animenewsnetwork.com/newsfeed/")
     news_data = []
 
     for entry in feed.entries[:10]:
-        print(f"Processing: {entry.title}")
-      
-        img_match = re.search(r'<img [^>]*src="([^"]+)"', entry.description)
-        img_url = img_match.group(1) if img_match else ""
+        print(f"Syncing: {entry.title}")
         
-        clean_summary = re.sub('<[^<]+?>', '', entry.description).split('Der Beitrag')[0]
-        
+        en_title = translate(entry.title)
+
+        summary = entry.summary.split('<')[0] if '<' in entry.summary else entry.summary
+        en_summary = translate(summary)
+
         news_data.append({
-            "title": translate(entry.title),
+            "title": en_title,
             "link": entry.link,
             "date": entry.published,
-            "image": img_url,
-            "content": translate(clean_summary)
+            "summary": en_summary,
+            "id": entry.id
         })
 
     with open("news.json", "w", encoding="utf-8") as f:
