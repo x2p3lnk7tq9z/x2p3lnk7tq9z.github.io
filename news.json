@@ -1,0 +1,29 @@
+async function loadNews() {
+    const grid = document.getElementById('news-grid');
+    try {
+        const res = await fetch('../news.json');
+        const data = await res.json();
+        grid.innerHTML = "";
+
+        data.forEach(item => {
+            const strip = document.createElement('div');
+            strip.className = 'article-strip';
+            strip.onclick = () => {
+                const body = document.getElementById('reader-body');
+                body.innerHTML = `
+                    <h2>${item.title}</h2>
+                    <img src="${item.image}">
+                    <div class="article-body"><p>${item.content}</p></div>
+                `;
+                document.getElementById('reader').style.display = 'block';
+            };
+            strip.innerHTML = `
+                <img src="${item.image}">
+                <div class="title-text">> ${item.title}</div>
+            `;
+            grid.appendChild(strip);
+        });
+    } catch (e) {
+        grid.innerHTML = "CORE_OFFLINE: run scrape.yml manually";
+    }
+}
