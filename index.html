@@ -1,107 +1,267 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>₍^. .^₎⟆</title>
-    <link rel="icon" type="image/png" href="../pictures/cat.png" />
-    <style>
-        :root {
-            --bg: #ffffff;
-            --fg: #000000;
-            --accent: #555555;
-            --font: 'JetBrains Mono', 'Fira Code', monospace;
-        }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>₍^. .^₎⟆</title>
+        <link rel="icon" type="image/png" href="../pictures/cat.png" />
+        <style>
+            :root {
+                --bg: #000000;
+                --fg: #ffffff;
+                --accent: #555555;
+                --font: "JetBrains Mono", "Fira Code", monospace;
+                --term-border: #ffffff;
+            }
 
-        body {
-            background-color: var(--bg);
-            color: var(--fg);
-            font-family: var(--font);
-            margin: 0;
-            padding: 40px;
-            line-height: 1.6;
-            display: flex;
-            justify-content: center;
-        }
+            body.light-mode {
+                --bg: #ffffff;
+                --fg: #000000;
+                --accent: #aaaaaa;
+                --term-border: #000000;
+            }
 
-        .container {
-            max-width: 800px;
-            width: 100%;
-        }
+            body {
+                background-color: var(--bg);
+                color: var(--fg);
+                font-family: var(--font);
+                margin: 0;
+                padding: 40px;
+                line-height: 1.6;
+                display: flex;
+                justify-content: center;
+                transition:
+                    background 0.1s,
+                    color 0.1s;
+            }
 
-        .prompt::before {
-            content: "> ";
-            color: var(--accent);
-        }
+            .container {
+                max-width: 800px;
+                width: 100%;
+            }
+            .prompt::before {
+                content: "> ";
+                color: var(--accent);
+            }
+            header {
+                margin-bottom: 40px;
+            }
+            section {
+                margin-bottom: 30px;
+            }
 
-        header { margin-bottom: 40px; }
-        section { margin-bottom: 30px; }
-        
-        h1, h2 { 
-            font-size: 1rem; 
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 1px solid var(--fg);
-            display: inline-block;
-            margin-bottom: 15px;
-        }
+            h1,
+            h2 {
+                font-size: 1rem;
+                margin: 0;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                border-bottom: 1px solid var(--fg);
+                display: inline-block;
+                margin-bottom: 15px;
+            }
 
-        ul { list-style: none; padding: 0; margin: 0; }
-        li { margin-bottom: 5px; }
-        li::before { content: "- "; color: var(--accent); }
+            ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+            li {
+                margin-bottom: 5px;
+            }
+            li::before {
+                content: "- ";
+                color: var(--accent);
+            }
 
-        a { color: var(--fg); text-decoration: none; border-bottom: 1px dotted var(--accent); }
-        a:hover { background: var(--fg); color: var(--bg); }
+            a {
+                color: var(--fg);
+                text-decoration: none;
+                border-bottom: 1px dotted var(--accent);
+            }
+            a:hover {
+                background: var(--fg);
+                color: var(--bg);
+            }
 
-        .cursor {
-            display: inline-block;
-            width: 8px;
-            height: 15px;
-            background: var(--fg);
-            margin-left: 5px;
-            animation: blink 1s infinite;
-            vertical-align: middle;
-        }
+            .cursor {
+                display: inline-block;
+                width: 8px;
+                height: 15px;
+                background: var(--fg);
+                margin-left: 5px;
+                animation: blink 1s infinite;
+                vertical-align: middle;
+            }
 
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
+            @keyframes blink {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0;
+                }
+            }
 
-        @media (max-width: 600px) {
-            body { padding: 20px; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <div class="prompt">whoami</div>
-            <p><strong>developer</strong> @ cat4.org</p>
-        </header>
+            #term-overlay {
+                display: none;
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 95%;
+                max-width: 600px;
+                background: var(--bg);
+                color: var(--fg);
+                padding: 15px;
+                border: 1px solid var(--term-border);
+                z-index: 1000;
+                box-sizing: border-box;
+            }
 
-        <section id="about">
-            <h2>About Me</h2>
-            <p>i like minimalism, minecraft and counter strike. currently fucking around with hyprland too much.</p>
-        </section>
+            #term-help {
+                font-size: 0.75rem;
+                color: var(--accent);
+                border-bottom: 1px dashed var(--accent);
+                margin-bottom: 10px;
+                padding-bottom: 5px;
+            }
 
-        <section id="projects">
-            <h2>Projects</h2>
-            <ul>
-                <li><a href="https://github.com/x2p3lnk7tq9z/dotfiles">dotfiles (not public yet)</a> - cute ass dotfiles trust</li>
-                <li><a href="#">cat4-core</a> - lightweight backend utility</li>
-            </ul>
-        </section>
+            .input-wrapper {
+                display: flex;
+                align-items: center;
+                height: 1.2rem;
+            }
 
-        <section id="skills">
-            <h2>skills</h2>
-            <p>bash, python, learning rust, linux system administration</p>
-        </section>
+            #term-input {
+                background: none;
+                border: none;
+                color: inherit;
+                font-family: inherit;
+                font-size: 0.85rem;
+                outline: none;
+                flex: 1;
+                margin-left: 10px;
+                padding: 0;
+                line-height: 1.2rem;
+            }
 
-        <footer>
-            <div class="prompt">logout<span class="cursor"></span></div>
-        </footer>
-    </div>
-</body>
+            .shell-prompt {
+                color: var(--accent);
+                white-space: nowrap;
+                font-size: 0.85rem;
+                line-height: 1.2rem;
+            }
+
+            #term-output {
+                font-size: 0.8rem;
+                margin-bottom: 8px;
+                white-space: pre-wrap;
+                color: var(--fg);
+                line-height: 1.4;
+            }
+
+            @media (max-width: 600px) {
+                body {
+                    padding: 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <div class="prompt">whoami</div>
+                <p><strong>developer</strong> @ cat4.org</p>
+            </header>
+
+            <section id="about">
+                <h2>About Me</h2>
+                <p>
+                    i like anime, minimalism, minecraft and counter strike.
+                    currently fucking around with hyprland too much.
+                </p>
+            </section>
+
+            <section id="projects">
+                <h2>Projects</h2>
+                <ul>
+                    <li>
+                        <a href="https://github.com/x2p3lnk7tq9z/dotfiles"
+                            >dotfiles (not public yet)</a
+                        >
+                        - cute ass dotfiles trust
+                    </li>
+                    <li>
+                        <a href="/news">cat4-news</a> - lightweight news
+                        subsystem
+                    </li>
+                </ul>
+            </section>
+
+            <section id="skills">
+                <h2>skills</h2>
+                <p>bash, python, learning rust, linux system administration</p>
+            </section>
+
+            <footer>
+                <div class="prompt">logout<span class="cursor"></span></div>
+            </footer>
+        </div>
+
+        <div id="term-overlay">
+            <div id="term-help">commands: theme, fetch, clear, exit</div>
+            <div id="term-output"></div>
+            <div class="input-wrapper">
+                <span class="shell-prompt">cat4@sh:~$</span>
+                <input
+                    type="text"
+                    id="term-input"
+                    spellcheck="false"
+                    autocomplete="off"
+                />
+            </div>
+        </div>
+
+        <script>
+            const overlay = document.getElementById("term-overlay");
+            const input = document.getElementById("term-input");
+            const output = document.getElementById("term-output");
+
+            document.addEventListener("keydown", (e) => {
+                if (e.ctrlKey && e.key === "e") {
+                    e.preventDefault();
+                    overlay.style.display =
+                        overlay.style.display === "block" ? "none" : "block";
+                    if (overlay.style.display === "block") input.focus();
+                }
+                if (e.key === "Escape") overlay.style.display = "none";
+            });
+
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    const cmd = input.value.toLowerCase().trim();
+                    input.value = "";
+
+                    if (cmd === "theme") {
+                        document.body.classList.toggle("light-mode");
+                        output.innerText = "theme toggled.";
+                    } else if (cmd === "fetch") {
+                        output.innerText =
+                            "os: arch linux\nwm: hyprland\nhost: github-pages\nshell: c4sh\ntheme: " +
+                            (document.body.classList.contains("light-mode")
+                                ? "light"
+                                : "dark");
+                    } else if (cmd === "clear") {
+                        output.innerText = "";
+                    } else if (cmd === "exit") {
+                        overlay.style.display = "none";
+                    } else if (cmd !== "") {
+                        output.innerText = "sh: command not found: " + cmd;
+                    }
+                }
+            });
+        </script>
+    </body>
 </html>
