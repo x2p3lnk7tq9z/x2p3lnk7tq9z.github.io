@@ -18,15 +18,16 @@
             .close-btn { cursor: pointer; color: #ff0000; }
             .article-body { line-height: 1.8; color: #ccc; font-size: 1rem; }
             .article-body img { max-width: 100%; height: auto; margin: 20px 0; border: 1px solid var(--accent); }
+            .status-msg { font-size: 0.8rem; color: #00ff00; }
         </style>
     </head>
     <body>
         <header>
-            <span>CAT4_NEWS_SUBSYSTEM</span>
+            <span id="status">CAT4_NEWS_SUBSYSTEM [READY]</span>
             <a href="/" style="color:var(--fg); text-decoration:none;">[ EXIT ]</a>
         </header>
 
-        <div id="news-grid" class="news-row">SYNCING...</div>
+        <div id="news-grid" class="news-row">SYNCING_ASSETS...</div>
 
         <div id="reader">
             <div class="reader-content">
@@ -39,12 +40,25 @@
         </div>
 
         <script>
-            async function loadNews() {
+            async function loadNews(retries = 3) {
                 const grid = document.getElementById('news-grid');
+                const status = document.getElementById('status');
+                
                 try {
                     const res = await fetch('https://api.jikan.moe/v4/anime/recent/recommendations');
+                    
+                    if (res.status === 429 && retries > 0) {
+                        status.innerText = `RATE_LIMITED: RETRYING_IN_${4 - retries}s...`;
+                        await new Promise(r => setTimeout(r, 2000));
+                        return loadNews(retries - 1);
+                    }
+
+                    if (!res.ok) throw new Error();
+
                     const json = await res.json();
                     grid.innerHTML = "";
+                    status.innerText = "CAT4_NEWS_SUBSYSTEM [ONLINE]";
+
                     json.data.slice(0, 15).forEach(item => {
                         const entry = item.entry[0];
                         const img = entry.images.jpg.large_image_url;
@@ -55,7 +69,8 @@
                         grid.appendChild(strip);
                     });
                 } catch (e) {
-                    grid.innerHTML = "CONNECTION_ERROR";
+                    grid.innerHTML = `<div style="color:red;">CONNECTION_ERROR: API_REJECTED_REQUEST<br><br><button onclick="loadNews()" style="background:none; border:1px solid white; color:white; cursor:pointer; font-family:inherit; padding:5px 10px;">FORCE_RECONNECT</button></div>`;
+                    status.innerText = "CAT4_NEWS_SUBSYSTEM [OFFLINE]";
                 }
             }
 
