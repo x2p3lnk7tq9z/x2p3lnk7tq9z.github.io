@@ -1,32 +1,21 @@
 name: cat4-core-sync
-
 on:
   schedule:
     - cron: '0 * * * *'
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-
-      - name: Install Deps
-        run: pip install feedparser requests
-
-      - name: Run Core Scraper
-        run: python core.py
-
-      - name: Commit and Push
-        run: |
+      - run: pip install feedparser requests beautifulsoup4 lxml
+      - run: python news/core.py
+      - run: |
           git config --global user.name "cat4-core-bot"
           git config --global user.email "bot@cat4.org"
-          git add news.json
-          git commit -m "sync: anime news update" || exit 0
+          git add news/news.json
+          git commit -m "sync: news update" || exit 0
           git push
