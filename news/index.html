@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>cat4 // full_news</title>
+        <link rel="icon" type="image/png" href="../pictures/cat.png" />
+        <style>
+            :root {
+                --bg: #000000;
+                --fg: #ffffff;
+                --accent: #444444;
+                --font: "JetBrains Mono", monospace;
+            }
+            body {
+                background: var(--bg);
+                color: var(--fg);
+                font-family: var(--font);
+                margin: 0;
+                padding: 20px;
+            }
+            header {
+                border-bottom: 1px solid var(--fg);
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                font-size: 0.8rem;
+            }
+            .news-row {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                max-width: 900px;
+                margin: 0 auto;
+            }
+            .article-strip {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                border: 1px solid var(--accent);
+                padding: 10px;
+                cursor: pointer;
+            }
+            .article-strip:hover {
+                background: #111;
+                border-color: var(--fg);
+            }
+            .article-strip img {
+                width: 120px;
+                height: 70px;
+                object-fit: cover;
+            }
+
+            #reader {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: var(--bg);
+                z-index: 100;
+                overflow-y: auto;
+            }
+            .reader-content {
+                max-width: 800px;
+                margin: 40px auto;
+                border: 1px solid var(--fg);
+                padding: 30px;
+            }
+            .reader-header {
+                border-bottom: 1px solid var(--accent);
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                display: flex;
+                justify-content: space-between;
+            }
+            .close-btn {
+                cursor: pointer;
+                color: #ff0000;
+            }
+
+            .article-body {
+                line-height: 1.8;
+                color: #eee;
+                font-size: 1rem;
+            }
+            .article-body img {
+                max-width: 100%;
+                height: auto;
+                margin: 20px 0;
+                border: 1px solid var(--accent);
+            }
+            .article-body h2 {
+                color: var(--fg);
+                margin-top: 30px;
+            }
+            .loading-text {
+                color: #00ff00;
+                font-style: italic;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div>CAT4_NEWS_SYSTEM [v2.0_FULL_TEXT]</div>
+            <div>STATUS: SCRAPING_ORIGINAL_SOURCE...</div>
+        </header>
+
+        <div id="news-grid" class="news-row"></div>
+
+        <div id="reader">
+            <div class="reader-content">
+                <div class="reader-header">
+                    <span>ARTICLE_DECRYPTOR</span>
+                    <span class="close-btn" id="close-x">[ CLOSE_ESC ]</span>
+                </div>
+                <div id="reader-body"></div>
+            </div>
+        </div>
+
+        <script>
+            async function translate(text) {
+                if (!text) return "";
+                const res = await fetch(
+                    `https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=en&dt=t&q=${encodeURI(text)}`,
+                );
+                const json = await res.json();
+                return json[0].map((x) => x[0]).join("");
+            }
+
+            async function fetchNews() {
+                const grid = document.getElementById("news-grid");
+                const res = await fetch(
+                    `https://api.rss2json.com/v1/api.json?rss_url=https://www.anime2you.de/feed/`,
+                );
+                const data = await res.json();
+                grid.innerHTML = "";
+
+                data.items.forEach(async (item) => {
+                    const enTitle = await translate(item.title);
+                    const strip = document.createElement("div");
+                    strip.className = "article-strip";
+                    strip.onclick = () =>
+                        openReader(
+                            item.link,
+                            enTitle,
+                            item.enclosure.link || item.thumbnail,
+                        );
+                    strip.innerHTML = `<img src="${item.thumbnail}"><div class="title-text">> ${enTitle}</div>`;
+                    grid.appendChild(strip);
+                });
+            }
+
+            async function openReader(url, title, mainImg) {
+                const reader = document.getElementById("reader");
+                const body = document.getElementById("reader-body");
+                reader.style.display = "block";
+                body.innerHTML = `<div class="loading-text">DECRYPTING_FULL_CONTENT...</div>`;
+
+                try {
+                    const scrapeRes = await fetch(
+                        `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+                    );
+                    const scrapeData = await scrapeRes.json();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(
+                        scrapeData.contents,
+                        "text/html",
+                    );
+
+                    const content =
+                        doc.querySelector(".entry-content") ||
+                        doc.querySelector("article");
+                    content
+                        .querySelectorAll("script, .ads, .social-share")
+                        .forEach((el) => el.remove());
+
+                    const rawHTML = content.innerHTML;
+                    const translatedHTML = await translate(rawHTML);
+
+                    body.innerHTML = `
+                        <h2>${title}</h2>
+                        <img src="${mainImg}">
+                        <div class="article-body">${translatedHTML}</div>
+                    `;
+                } catch (e) {
+                    body.innerHTML = "ERROR: SOURCE_PROTECTED_OR_OFFLINE";
+                }
+            }
+
+            function closeReader() {
+                document.getElementById("reader").style.display = "none";
+            }
+
+            document.getElementById("close-x").onclick = closeReader;
+            window.onkeydown = (e) => {
+                if (e.key === "Escape") closeReader();
+            };
+
+            fetchNews();
+        </script>
+    </body>
+</html>
