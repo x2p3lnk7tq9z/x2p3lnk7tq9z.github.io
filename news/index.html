@@ -4,43 +4,30 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>cat4 // news_core</title>
-        <link rel="icon" type="image/png" href="../pictures/cat.png" />
         <style>
             :root { --bg: #000000; --fg: #ffffff; --accent: #444444; --font: "JetBrains Mono", monospace; }
-            body { background: var(--bg); color: var(--fg); font-family: var(--font); margin: 0; padding: 20px; overflow-x: hidden; }
+            body { background: var(--bg); color: var(--fg); font-family: var(--font); margin: 0; padding: 20px; }
             header { border-bottom: 1px solid var(--fg); margin-bottom: 20px; padding-bottom: 10px; display: flex; justify-content: space-between; font-size: 0.8rem; }
             .news-row { display: flex; flex-direction: column; gap: 10px; max-width: 900px; margin: 0 auto; }
-            
-            .article-strip { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid var(--accent); cursor: pointer; transition: 0.1s; }
+            .article-strip { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid var(--accent); cursor: pointer; }
             .article-strip:hover { border-color: var(--fg); background: #111; }
-            .title-text { font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .date-text { font-size: 0.7rem; color: var(--accent); min-width: 80px; text-align: right; }
-
             #reader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 100; overflow-y: auto; padding: 40px 20px; }
-            .reader-content { max-width: 700px; margin: 0 auto; border: 1px solid var(--fg); padding: 30px; background: var(--bg); }
-            .reader-header { border-bottom: 1px solid var(--accent); margin-bottom: 20px; padding-bottom: 10px; display: flex; justify-content: space-between; font-size: 0.8rem; }
-            .close-btn { cursor: pointer; color: #ff0000; }
+            .reader-content { max-width: 800px; margin: 0 auto; border: 1px solid var(--fg); padding: 30px; background: var(--bg); }
             .article-body { line-height: 1.8; color: #ccc; }
-            .full-link { display: inline-block; margin-top: 20px; border: 1px solid var(--fg); padding: 5px 10px; color: var(--fg); text-decoration: none; font-size: 0.7rem; }
+            .article-body img { max-width: 100%; height: auto; margin: 10px 0; }
         </style>
     </head>
     <body>
-
         <header>
             <span>CAT4_NEWS_READER [ACTIVE]</span>
             <a href="/" style="color:var(--fg); text-decoration:none;">[ EXIT_TO_ROOT ]</a>
         </header>
 
-        <div id="news-grid" class="news-row">
-            <div>CONNECTING_TO_CORE_DATA...</div>
-        </div>
+        <div id="news-grid" class="news-row">LOADING_LOCAL_DATA...</div>
 
         <div id="reader">
             <div class="reader-content">
-                <div class="reader-header">
-                    <span>CONTENT_VIEWER</span>
-                    <span class="close-btn" onclick="closeReader()">[ CLOSE_ESC ]</span>
-                </div>
+                <div style="text-align:right; margin-bottom:10px;"><span style="cursor:pointer; color:red;" onclick="closeReader()">[ CLOSE_ESC ]</span></div>
                 <div id="reader-body"></div>
             </div>
         </div>
@@ -49,46 +36,25 @@
             async function loadNews() {
                 const grid = document.getElementById('news-grid');
                 try {
-                    const res = await fetch('../news.json');
-                    if (!res.ok) throw new Error();
+                    const res = await fetch('./news.json');
                     const data = await res.json();
                     grid.innerHTML = "";
-
                     data.forEach(item => {
                         const strip = document.createElement('div');
                         strip.className = 'article-strip';
-                        strip.onclick = () => openReader(item);
-                        strip.innerHTML = `
-                            <div class="title-text">> ${item.title}</div>
-                            <div class="date-text">${item.date.split('202')[0]}</div>
-                        `;
+                        strip.onclick = () => {
+                            document.getElementById('reader-body').innerHTML = `<h2>${item.title}</h2><div class="article-body">${item.content}</div>`;
+                            document.getElementById('reader').style.display = 'block';
+                        };
+                        strip.innerHTML = `<div>> ${item.title}</div>`;
                         grid.appendChild(strip);
                     });
                 } catch (e) {
-                    grid.innerHTML = "CORE_SYNC_ERROR: NO_NEWS_JSON_FOUND";
+                    grid.innerHTML = "CORE_SYNC_ERROR: RUN_ACTIONS_MANUALLY";
                 }
             }
-
-            function openReader(item) {
-                const body = document.getElementById('reader-body');
-                body.innerHTML = `
-                    <h2 style="margin-top:0;">${item.title}</h2>
-                    <div class="article-body">${item.summary}</div>
-                    <a href="${item.link}" target="_blank" class="full-link">SOURCE_EXTERNAL_LINK</a>
-                `;
-                document.getElementById('reader').style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeReader() {
-                document.getElementById('reader').style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-
-            window.addEventListener('keydown', (e) => {
-                if (e.key === "Escape") closeReader();
-            });
-
+            function closeReader() { document.getElementById('reader').style.display = 'none'; }
+            window.onkeydown = (e) => { if(e.key === "Escape") closeReader(); };
             loadNews();
         </script>
     </body>
