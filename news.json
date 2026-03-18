@@ -8,22 +8,22 @@ async function loadNews() {
         data.forEach(item => {
             const strip = document.createElement('div');
             strip.className = 'article-strip';
+            strip.innerHTML = `
+                <div class="title-text">> ${item.title}</div>
+                <div class="date-text">${item.date.split(' ')[0]}</div>
+            `;
             strip.onclick = () => {
-                const body = document.getElementById('reader-body');
-                body.innerHTML = `
+                document.getElementById('reader-body').innerHTML = `
                     <h2>${item.title}</h2>
-                    <img src="${item.image}">
-                    <div class="article-body"><p>${item.content}</p></div>
+                    <p style="color: #888; font-size: 0.8rem;">Source: Anime News Network</p>
+                    <div class="article-body">${item.summary}...</div>
+                    <a href="${item.link}" target="_blank" class="full-link">READ_FULL_STORY_AT_SOURCE</a>
                 `;
                 document.getElementById('reader').style.display = 'block';
             };
-            strip.innerHTML = `
-                <img src="${item.image}">
-                <div class="title-text">> ${item.title}</div>
-            `;
             grid.appendChild(strip);
         });
     } catch (e) {
-        grid.innerHTML = "CORE_OFFLINE: run scrape.yml manually";
+        grid.innerHTML = "SYSTEM_ERROR: CORE_SYNC_REQUIRED";
     }
 }
